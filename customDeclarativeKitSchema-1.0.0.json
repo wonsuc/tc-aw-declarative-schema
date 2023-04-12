@@ -374,7 +374,6 @@
 
     },
     "required": [
-        "name",
-        "level"
+        "name"
     ]
 }
