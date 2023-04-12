@@ -37,6 +37,12 @@
             "type": "string",
             "description": "A name of the kit"
         },
+        "description": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
         "author": {
             "type": "string",
             "description": "Name of the authoring organization"
