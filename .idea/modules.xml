@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$AWS2_STAGE_DIR$/tc-aw-declarative-schema.iml" filepath="$AWS2_STAGE_DIR$/tc-aw-declarative-schema.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-aw-declarative-schema.iml" filepath="$PROJECT_DIR$/tc-aw-declarative-schema.iml" />
     </modules>
   </component>
 </project>
