@@ -1,7 +1,7 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "description": "This is the schema the declarative View Model (in JSON format) must adhere to. The Apollo audit check validates all View Model JSON files against this schema. For explanation of the keywords of this schema, please visit https://ajv.js.org/keywords.html",
-    "$defs": {
+    "definitions": {
         "eventTypeDef": {
             "description": "An event object can have event name and eventData OR a message and a condition statement which would evaluate to boolean",
             "oneOf": [
@@ -65,1084 +65,237 @@
             "description": "Actions can send array of events/actionMessages in case of success and failure of the action.",
             "properties": {
                 "success": {
-                    "$ref": "#/$defs/eventTypeDef"
+                    "$ref": "#/definitions/eventTypeDef"
                 },
                 "failure": {
-                    "$ref": "#/$defs/eventTypeDef"
+                    "$ref": "#/definitions/eventTypeDef"
                 }
             }
         },
-        "actionDef": {
-            "description": "Actions can be of different actionType (REST, JSFunction, JSFunctionAsync, Event, Command or TcSoaService). All actions have inputData which specifies the JSON input for the action and outputData for mapping the output response.",
-            "anyOf": [
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "TcSoaService"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "TcSoaService"
-                            },
-                            "serviceName": {
-                                "type": "string",
-                                "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "headerState": {
-                                "type": "object"
-                            },
-                            "policy": {
-                                "type": "object",
-                                "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
-                                "patternProperties": {
-                                    "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                                        "type": "array",
-                                        "items": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string"
-                                                },
-                                                "properties": {
-                                                    "$ref": "#/$defs/policyPropertiesDef"
-                                                }
-                                            },
-                                            "required": [
-                                                "name",
-                                                "properties"
-                                            ]
-                                        }
-                                    }
-                                }
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+        "TcSoaServiceDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "TcSoaService"
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "dataProvider"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "dataProvider"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "methods": {
-                                "type": "array",
-                                "description": "Used with actionType 'dataProvider'. Array of dataProviders that should be invoked as part of this action."
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "serviceName": {
+                    "type": "string",
+                    "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Event"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Event"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "policy": {
-                                "type": "object",
-                                "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
-                                "items": {
-                                    "type": "array",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "properties": {
-                                            "$ref": "#/$defs/policyPropertiesDef"
-                                        }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "properties"
-                                    ]
-                                }
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "RESTService"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "RESTService"
-                            },
-                            "serviceName": {
-                                "type": "string",
-                                "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "GraphQL"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "GraphQL"
-                            },
-                            "serviceName": {
-                                "type": "string",
-                                "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "$ref": "#/$defs/GraphQLInputDataDef",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "parameters": {
+                    "type": "object"
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "openGlobalNavigationPanelCustomAction"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "openGlobalNavigationPanelCustomAction"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "headerState": {
+                    "type": "object"
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Copy"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
+                "policy": {
+                    "type": "object",
+                    "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
+                    "items": {
+                        "type": "array",
                         "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
                         "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Copy"
+                            "name": {
+                                "type": "string"
                             },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
+                            "properties": {
+                                "$ref": "#/definitions/policyPropertiesDef"
                             }
-                        }
-                    },
-                    "else": false
+                        },
+                        "required": [
+                            "name",
+                            "properties"
+                        ]
+                    }
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Navigate"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Navigate"
-                            },
-                            "navigationParams": {
-                                "type": [
-                                    "object",
-                                    "string"
-                                ],
-                                "description": "Used with actionType 'Navigate'. Specifies the parameters to be passed while navigating to the state"
-                            },
-                            "navigateIn": {
-                                "type": "string",
-                                "description": "Used with actionType 'Navigate'. Specifies if the new url should be opened in 'newTab' or 'newWindow'"
-                            },
-                            "navigateTo": {
-                                "type": "string",
-                                "description": "Used with actionType 'Navigate'. Specifies the state to navigate to"
-                            },
-                            "options": {
-                                "type": "object",
-                                "description": "Used with actionType 'Navigate'. Can be used to specify the 'top', 'left', 'height', 'width' for the 'newWindow'"
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "popup"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "popup"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "JSFunctionAsync"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "JSFunctionAsync"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "policy": {
-                                "type": "object",
-                                "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
-                                "items": {
-                                    "type": "array",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "properties": {
-                                            "$ref": "#/$defs/policyPropertiesDef"
-                                        }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "properties"
-                                    ]
-                                }
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "JSFunction"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "JSFunction"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "inputData": {
-                                "type": "object",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "policy": {
-                                "type": "object",
-                                "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
-                                "items": {
-                                    "type": "array",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "properties": {
-                                            "$ref": "#/$defs/policyPropertiesDef"
-                                        }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "properties"
-                                    ]
-                                }
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
                 },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Edit"
-                            }
-                        }
-                    },
-                    "then": {
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
                         "type": "object",
                         "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
                         "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Edit"
-                            },
-                            "method": {
-                                "type": "string",
-                                "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
-                },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "batchJob"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "batchJob"
-                            },
-                            "steps": {
-                                "type": "array",
-                                "description": "Collection of actions that has to executed one after another",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "action": {
-                                            "type": "string"
-                                        },
-                                        "outputArg": {
-                                            "type": "array",
-                                            "description": "Array of object given to subsequent next action."
-                                        },
-                                        "inputArg": {
-                                            "type": "object",
-                                            "description": "Input from previous action and mapped to parameters of action."
-                                        },
-                                        "condition": {
-                                            "type": "string",
-                                            "description": "A condition statement which would evaluate to boolean."
-                                        }
-                                    },
-                                    "required": [
-                                        "action"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
-                },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Sync"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Sync"
-                            },
-                            "inputData": {
-                                "$ref": "#/$defs/SyncInputDataDef",
-                                "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
-                            },
-                            "events": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            },
-                            "actionMessages": {
-                                "$ref": "#/$defs/actionMessagesDef",
-                                "description": "User messages. It can be made condition based"
-                            },
-                            "parameters": {
-                                "type": "object"
-                            },
-                            "deps": {
-                                "type": "string",
-                                "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
-                            },
-                            "dataParsers": {
-                                "type": "array",
-                                "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
-                                "items": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "id": {
-                                            "type": "string"
-                                        },
-                                        "responseObjs": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "responseObjs"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "else": false
-                },
-                {
-                    "if": {
-                        "properties": {
-                            "actionType": {
-                                "const": "Command"
-                            }
-                        }
-                    },
-                    "then": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "actionType",
-                            "inputData"
-                        ],
-                        "properties": {
-                            "actionType": {
-                                "type": "string",
-                                "const": "Command"
-                            },
-                            "inputData": {
-                                "$ref": "#/$defs/CommandActionInputDataDef",
-                                "description": "JSON data for the action input."
-                            },
-                            "outputData": {
-                                "type": "object",
-                                "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
-                            }
-                        }
-                    },
-                    "else": false
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
                 }
-            ]
+            }
         },
-        "TcSoaServiceDef": {},
-        "dataProviderDef": {},
-        "EventDef": {},
-        "RESTServiceDef": {},
+        "dataProviderDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "dataProvider"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "methods": {
+                    "type": "array",
+                    "description": "Used with actionType 'dataProvider'. Array of dataProviders that should be invoked as part of this action."
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "EventDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Event"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "policy": {
+                    "type": "object",
+                    "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
+                    "items": {
+                        "type": "array",
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "properties": {
+                                "$ref": "#/definitions/policyPropertiesDef"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "properties"
+                        ]
+                    }
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
         "GraphQLInputDataDef": {
             "additionalProperties": false,
             "type": "object",
@@ -1157,7 +310,70 @@
                 }
             }
         },
-        "GraphQLDef": {},
+        "GraphQLDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "GraphQL"
+                },
+                "serviceName": {
+                    "type": "string",
+                    "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "$ref": "#/definitions/GraphQLInputDataDef",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
         "SyncInputDataDef": {
             "additionalProperties": false,
             "type": "object",
@@ -1178,15 +394,540 @@
                 "port"
             ]
         },
-        "SyncDef": {},
-        "openGlobalNavigationPanelCustomActionDef": {},
-        "CopyDef": {},
-        "NavigateDef": {},
-        "popupDef": {},
-        "JSFunctionAsyncDef": {},
-        "JSFunctionDef": {},
-        "EditDef": {},
-        "batchJobDef": {},
+        "SyncDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Sync"
+                },
+                "inputData": {
+                    "$ref": "#/definitions/SyncInputDataDef",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "openGlobalNavigationPanelCustomActionDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "openGlobalNavigationPanelCustomAction"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "CopyDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Copy"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "NavigateDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Navigate"
+                },
+                "navigationParams": {
+                    "type": [
+                        "object",
+                        "string"
+                    ],
+                    "description": "Used with actionType 'Navigate'. Specifies the parameters to be passed while navigating to the state"
+                },
+                "navigateIn": {
+                    "type": "string",
+                    "description": "Used with actionType 'Navigate'. Specifies if the new url should be opened in 'newTab' or 'newWindow'"
+                },
+                "navigateTo": {
+                    "type": "string",
+                    "description": "Used with actionType 'Navigate'. Specifies the state to navigate to"
+                },
+                "options": {
+                    "type": "object",
+                    "description": "Used with actionType 'Navigate'. Can be used to specify the 'top', 'left', 'height', 'width' for the 'newWindow'"
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "popupDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "popup"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "JSFunctionAsyncDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "JSFunctionAsync"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "policy": {
+                    "type": "object",
+                    "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
+                    "items": {
+                        "type": "array",
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "properties": {
+                                "$ref": "#/definitions/policyPropertiesDef"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "properties"
+                        ]
+                    }
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "JSFunctionDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "JSFunction"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "inputData": {
+                    "type": "object",
+                    "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                },
+                "parameters": {
+                    "type": "object"
+                },
+                "deps": {
+                    "type": "string",
+                    "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                },
+                "policy": {
+                    "type": "object",
+                    "description": "Used with actionType 'TcSoaService'. This is a definition of property policy provided with SOA",
+                    "items": {
+                        "type": "array",
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "properties": {
+                                "$ref": "#/definitions/policyPropertiesDef"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "properties"
+                        ]
+                    }
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "EditDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Edit"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                },
+                "events": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "Events can be fired and listened/handled in declarative View Models. They are a means of a View Model communicating with other View Models or UI elements. 'Actions' can fire events."
+                },
+                "actionMessages": {
+                    "$ref": "#/definitions/actionMessagesDef",
+                    "description": "User messages. It can be made condition based"
+                },
+                "dataParsers": {
+                    "type": "array",
+                    "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "responseObjs": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "responseObjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "batchJobDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "batchJob"
+                },
+                "steps": {
+                    "type": "array",
+                    "description": "Collection of actions that has to executed one after another",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "action": {
+                                "type": "string"
+                            },
+                            "outputArg": {
+                                "type": "array",
+                                "description": "Array of object given to subsequent next action."
+                            },
+                            "inputArg": {
+                                "type": "object",
+                                "description": "Input from previous action and mapped to parameters of action."
+                            },
+                            "condition": {
+                                "type": "string",
+                                "description": "A condition statement which would evaluate to boolean."
+                            }
+                        },
+                        "required": [
+                            "action"
+                        ]
+                    }
+                }
+            }
+        },
         "CommandActionInputDataDef": {
             "additionalProperties": false,
             "required": [
@@ -1208,14 +949,35 @@
                 }
             }
         },
-        "CommandDef": {},
+        "CommandDef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "actionType",
+                "inputData"
+            ],
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "const": "Command"
+                },
+                "inputData": {
+                    "$ref": "#/definitions/CommandActionInputDataDef",
+                    "description": "JSON data for the action input."
+                },
+                "outputData": {
+                    "type": "object",
+                    "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                }
+            }
+        },
         "policyPropertiesDef": {
-            "type": "array",
+            "type": "object",
             "items": {
-                "type": "object",
                 "required": [
                     "name"
                 ],
+                "additionalProperties": false,
                 "properties": {
                     "name": {
                         "type": "string"
@@ -1223,8 +985,7 @@
                     "modifiers": {
                         "type": "array"
                     }
-                },
-                "additionalProperties": false
+                }
             }
         },
         "viewModelObjectDef": {
@@ -1263,7 +1024,7 @@
                             "description": "Display name on the DOM"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1294,7 +1055,7 @@
                             "description": "Hint text to the user"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1305,7 +1066,7 @@
                             "description": "String displayed on the radio box of the radio is selected"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1316,7 +1077,7 @@
                             "description": "String displayed on the radio box of the radio is not selected"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1329,7 +1090,7 @@
                     "description": "Indicate the number of lines the widget can hold"
                 },
                 "dbValue": {
-                    "$ref": "#/$defs/propDbValueDef"
+                    "$ref": "#/definitions/propDbValueDef"
                 },
                 "maxLength": {
                     "type": "integer",
@@ -1364,7 +1125,7 @@
                             "description": "display value of the view model proeprty"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1375,7 +1136,7 @@
                             "description": "display value of the view model proeprty"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1387,7 +1148,7 @@
                     }
                 },
                 "uiValue": {
-                    "$ref": "#/$defs/propDbValueDef"
+                    "$ref": "#/definitions/propDbValueDef"
                 },
                 "vertical": {
                     "type": "boolean",
@@ -1484,7 +1245,7 @@
                     "type": "array"
                 },
                 "value": {
-                    "$ref": "#/$defs/propDbValueDef"
+                    "$ref": "#/definitions/propDbValueDef"
                 },
                 "dataProvider": {
                     "type": "string"
@@ -1525,7 +1286,7 @@
                             "type": "string"
                         },
                         {
-                            "$ref": "#/$defs/paramLocalizationDef"
+                            "$ref": "#/definitions/paramLocalizationDef"
                         }
                     ]
                 },
@@ -1645,7 +1406,7 @@
             "description": "Expressions can be defined as simple strings or object.",
             "properties": {
                 "expression": {
-                    "$ref": "#/$defs/expressionStringOrObjectDef"
+                    "$ref": "#/definitions/expressionStringOrObjectDef"
                 },
                 "trackValues": {
                     "type": "boolean"
@@ -1764,10 +1525,10 @@
                             "items": {
                                 "anyOf": [
                                     {
-                                        "$ref": "#/$defs/fieldDef"
+                                        "$ref": "#/definitions/fieldDef"
                                     },
                                     {
-                                        "$ref": "#/$defs/structDef"
+                                        "$ref": "#/definitions/structDef"
                                     }
                                 ]
                             }
@@ -1811,7 +1572,7 @@
                                     "type": "object",
                                     "patternProperties": {
                                         "\\b[a-z]+[A-Z]*([A-Z]*[a-z]*[0-9]*)*\\b": {
-                                            "$ref": "#/$defs/dataMapperEachPropDef"
+                                            "$ref": "#/definitions/dataMapperEachPropDef"
                                         }
                                     }
                                 },
@@ -1836,7 +1597,7 @@
                 "structValue": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/$defs/fieldDef"
+                        "$ref": "#/definitions/fieldDef"
                     }
                 }
             },
@@ -1905,7 +1666,7 @@
                         "commands": {
                             "type": "object",
                             "items": {
-                                "$ref": "#/$defs/commandDef"
+                                "$ref": "#/definitions/commandDef"
                             }
                         },
                         "editContext": {
@@ -2056,7 +1817,7 @@
                     "type": "array"
                 },
                 "value": {
-                    "$ref": "#/$defs/propDbValueDefForDataMapper"
+                    "$ref": "#/definitions/propDbValueDefForDataMapper"
                 },
                 "dataProvider": {
                     "type": [
@@ -2110,7 +1871,7 @@
                     "description": "Indicate the number of lines the widget can hold"
                 },
                 "dbValue": {
-                    "$ref": "#/$defs/propDbValueDefForDataMapper"
+                    "$ref": "#/definitions/propDbValueDefForDataMapper"
                 },
                 "maxLength": {
                     "type": "integer",
@@ -2211,7 +1972,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "$source": {
-                            "$ref": "#/$defs/sourceStringOrObjectDef",
+                            "$ref": "#/definitions/sourceStringOrObjectDef",
                             "description": "Indicates the reference on data context node to be used as starting point for evaluation. For ex. 'ctx.selected'"
                         },
                         "$query": {
@@ -2594,7 +2355,75 @@
             "additionalProperties": false,
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/actionDef"
+                    "description": "Actions can be of different actionType (REST, JSFunction, JSFunctionAsync, Event, Command or TcSoaService). All actions have inputData which specifies the JSON input for the action and outputData for mapping the output response.",
+                    "oneOf": [
+                        {
+                            "if": {
+                                "properties": {
+                                    "actionType": {
+                                        "const": "RESTService"
+                                    }
+                                }
+                            },
+                            "then": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "actionType"
+                                ],
+                                "properties": {
+                                    "actionType": {
+                                        "type": "string",
+                                        "const": "RESTService"
+                                    },
+                                    "serviceName": {
+                                        "type": "string",
+                                        "description": "Used with actionType 'TcSoaService'. Name of the SOA service that should be invoked."
+                                    },
+                                    "method": {
+                                        "type": "string",
+                                        "description": "Used with actionType 'JSFunction' or 'JSFunctionAsync'. Points to the method name that should be invoked from the js file specified in 'deps'"
+                                    },
+                                    "inputData": {
+                                        "type": "object",
+                                        "description": "JSON data for the action input. For ex. 'request' header can be the inputData in case of 'RESTService' actionType with method 'Get'."
+                                    },
+                                    "parameters": {
+                                        "type": "object"
+                                    },
+                                    "outputData": {
+                                        "type": "object",
+                                        "description": "JSON data for the action output. As part of this, the result of the action is mapped to view model data."
+                                    },
+                                    "deps": {
+                                        "type": "string",
+                                        "description": "Dependent files needed by the action. For ex. In case of actionType 'JSFunction', you would need to add a deps on some js file path."
+                                    },
+                                    "dataParsers": {
+                                        "type": "array",
+                                        "description": "In the View Model, an action can have an optional 'dataParsers' construct. It is an array of objects, each having an 'id: specifying which dataParseDefinition to use' & a 'responseObjs: path to the response object(s) to convert.'. The 'responseObjs' can be an array of objects, or a single one. properties below. The dataParsers accepts the response data and converts them to 'afx objects' each containing ViewModelProperties. These afx objects are directly consumable by the widgets provided by afx.",
+                                        "items": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "responseObjs": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "responseObjs"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "else": false
+                        }
+                    ]
                 }
             }
         },
@@ -2608,7 +2437,7 @@
                             "type": "object",
                             "patternProperties": {
                                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                                    "$ref": "#/$defs/viewModelObjectDef"
+                                    "$ref": "#/definitions/viewModelObjectDef"
                                 }
                             }
                         }
@@ -2618,7 +2447,7 @@
                     "type": "object",
                     "patternProperties": {
                         "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                            "$ref": "#/$defs/viewModelPropDef"
+                            "$ref": "#/definitions/viewModelPropDef"
                         }
                     }
                 }
@@ -2636,7 +2465,7 @@
             "type": "object",
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/functionDef"
+                    "$ref": "#/definitions/functionDef"
                 }
             }
         },
@@ -2645,7 +2474,7 @@
             "description": "Messages are declaratively defined in the View Model. Messages are launched by events and actions. They cover information, warning, error notifications. They give the user more deeper customization options. They are localized. They can fire some actions. They can even leverage view model data and conditions.",
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/messageDef"
+                    "$ref": "#/definitions/messageDef"
                 }
             }
         },
@@ -2654,7 +2483,7 @@
             "description": "Conditions provide live logic evaluation. They can evaluate to true/false. They can be used in visible-when clauses and can be used for event handling (onEvent handler). The data value can be live evaluated by condition. The conditions can refer to view model state and can update view model state. They can leverage Boolean condition expressions like '&&', '||', '==', '!='",
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/conditionDef"
+                    "$ref": "#/definitions/conditionDef"
                 }
             }
         },
@@ -2741,7 +2570,7 @@
             "description": "It contains the parser definitions. Each parser definition must define a 'props'. Each prop, which is of a specific JSON structure, is converted to a ViewModelProperty.",
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/dataParseDef"
+                    "$ref": "#/definitions/dataParseDef"
                 }
             }
         },
@@ -2751,7 +2580,7 @@
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                     "type": "object",
-                    "$ref": "#/$defs/dataProvidersDef"
+                    "$ref": "#/definitions/dataProvidersDef"
                 }
             }
         },
@@ -2760,7 +2589,7 @@
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                     "type": "object",
-                    "$ref": "#/$defs/dataProvidersDef"
+                    "$ref": "#/definitions/dataProvidersDef"
                 }
             }
         },
@@ -2770,7 +2599,7 @@
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                     "type": "object",
-                    "$ref": "#/$defs/chartProviderDef"
+                    "$ref": "#/definitions/chartProviderDef"
                 }
             }
         },
@@ -2779,7 +2608,7 @@
             "patternProperties": {
                 "\\b[a-z]+[A-Z]*([A-Z]*[a-z]*[0-9]*)*\\b": {
                     "type": "object",
-                    "$ref": "#/$defs/gridDef"
+                    "$ref": "#/definitions/gridDef"
                 }
             }
         },
@@ -2788,7 +2617,7 @@
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                     "type": "string",
-                    "$ref": "#/$defs/editConfigDef"
+                    "$ref": "#/definitions/editConfigDef"
                 }
             }
         },
@@ -2802,7 +2631,7 @@
                     "patternProperties": {
                         "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                             "type": "object",
-                            "$ref": "#/$defs/dataProvidersDef"
+                            "$ref": "#/definitions/dataProvidersDef"
                         }
                     }
                 },
@@ -2811,7 +2640,7 @@
                     "patternProperties": {
                         "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
                             "type": "object",
-                            "$ref": "#/$defs/dataProvidersDef"
+                            "$ref": "#/definitions/dataProvidersDef"
                         }
                     }
                 }
@@ -2822,7 +2651,7 @@
             "additionalProperties": false,
             "patternProperties": {
                 "^[a-zA-Z_]+[a-zA-Z0-9_]*$": {
-                    "$ref": "#/$defs/portsDef"
+                    "$ref": "#/definitions/portsDef"
                 }
             }
         },
