@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$AWS2_STAGE_DIR$/tc-aw-declarative-schema.iml" filepath="$AWS2_STAGE_DIR$/tc-aw-declarative-schema.iml" />
+    </modules>
+  </component>
+</project>
