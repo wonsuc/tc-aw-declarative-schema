@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="customDeclarativeBuildSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeBuildSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeBuildSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/build.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeCommandsViewModelSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeCommandsViewModelSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeCommandsViewModelSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/commandsViewModel.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeKitSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeKitSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeKitSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/kit.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeModuleSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeModuleSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeModuleSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/module.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeSiteSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeSiteSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeSiteSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/site_*.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeViewModelSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeViewModelSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeViewModelSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/*ViewModel.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="customDeclarativeWorkspaceSchema-1.0.0">
+          <value>
+            <SchemaInfo>
+              <option name="generatedName" value="New Schema" />
+              <option name="name" value="customDeclarativeWorkspaceSchema-1.0.0" />
+              <option name="relativePathToSchema" value="https://wonsuc.github.io/tc-aw-declarative-schema/customDeclarativeWorkspaceSchema-1.0.0.json" />
+              <option name="schemaVersion" value="JSON 스키마 버전 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/workspace_*.json" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
